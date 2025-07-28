@@ -19,7 +19,12 @@ async function bootstrap() {
   });
 
 
-  app.enableCors();
+  app.enableCors(
+    {
+      origin: ['http://localhost:3000', 'https://frontend-three-alpha-30.vercel.app'],
+      credentials: true,
+    }
+  );
 
   // API 버전 prefix
   app.setGlobalPrefix('api/v1');
