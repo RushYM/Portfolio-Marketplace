@@ -85,10 +85,10 @@ class ChatServiceClass {
       this.socket.disconnect();
     }
 
-    console.log('🔌 Socket.IO 연결 시작:', 'http://localhost:3001/chat');
+    console.log('🔌 Socket.IO 연결 시작:', process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001/chat');
     console.log('🔐 사용 토큰:', token ? token.substring(0, 20) + '...' : '없음');
 
-    this.socket = io('http://localhost:3001/chat', {
+    this.socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001/chat', {
       auth: {
         token,
       },
