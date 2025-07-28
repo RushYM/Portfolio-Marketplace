@@ -22,7 +22,7 @@ async function bootstrap() {
   const corsOrigin = configService.get<string>('CORS_ORIGIN');
   const allowedOrigins = corsOrigin 
     ? corsOrigin.split(',').map(origin => origin.trim())
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    : ['http://localhost:3000', 'http://127.0.0.1:3000', "https://frontend-three-alpha-30.vercel.app/"];
   
   app.enableCors({
     origin: allowedOrigins,
