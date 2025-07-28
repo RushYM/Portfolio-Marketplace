@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['http://localhost:3000'],
+  allowedDevOrigins: ['http://localhost:3000', 'https://frontend-three-alpha-30.vercel.app'],
   images: {
     remotePatterns: [
       {
@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
         pathname: '/**',
+      },
+      // Render 백엔드 도메인 추가
+      {
+        protocol: 'https',
+        hostname: 'portfolio-marketplace.onrender.com',
+        pathname: '/uploads/**',
       },
     ],
   },
