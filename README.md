@@ -1,6 +1,7 @@
-# 중고거래 플랫폼
+# 중고거래 플랫폼 
 
 Next.js와 NestJS를 사용한 풀스택 중고거래 웹 애플리케이션입니다.
+(https://frontend-three-alpha-30.vercel.app)
 
 ## 🚀 기술 스택
 
@@ -64,6 +65,7 @@ npm run dev
 2. GitHub 저장소 연결
 3. 환경 변수 설정:
    - `NEXT_PUBLIC_API_URL`: 백엔드 API URL
+   - `NEXT_PUBLIC_SOCKET_URL`: 백엔드 SOCKET URL
 
 ### 백엔드 (Railway)
 1. [Railway](https://railway.app)에 가입
@@ -89,7 +91,6 @@ npm run dev
 - 📱 반응형 디자인
 - 🖼️ 이미지 업로드
 
-## 📝 API 문서
 
-개발 서버 실행 후 `http://localhost:3001/api`에서 Swagger 문서를 확인할 수 있습니다.
+
 
