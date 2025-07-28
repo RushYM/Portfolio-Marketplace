@@ -18,24 +18,8 @@ async function bootstrap() {
     index: false, // 디렉토리 인덱싱 비활성화
   });
 
-  // CORS 설정
-  const corsOrigin = configService.get<string>('CORS_ORIGIN');
-  const allowedOrigins = corsOrigin 
-    ? corsOrigin.split(',').map(origin => origin.trim())
-    : ['http://localhost:3000', 'http://127.0.0.1:3000', "https://frontend-three-alpha-30.vercel.app/"];
-  
-  app.enableCors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Origin',
-      'X-Requested-With',
-      'Content-Type',
-      'Accept',
-      'Authorization',
-    ],
-  });
+
+  app.enableCors();
 
   // API 버전 prefix
   app.setGlobalPrefix('api/v1');
