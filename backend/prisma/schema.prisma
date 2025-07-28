@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// generator erd {
+//   provider = "prisma-erd-generator"
+//   output   = "../docs/ERD.svg"
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum ProductCategory {
+  ELECTRONICS // 전자기기
+  FASHION     // 패션/의류
+  HOME        // 가구/생활
+  BOOKS       // 도서
+  SPORTS      // 스포츠
+  BEAUTY      // 뷰티
+  TOYS        // 장난감/취미
+  OTHER       // 기타
+}
+
+enum ProductCondition {
+  NEW      // 새상품
+  LIKE_NEW // 거의 새것
+  GOOD     // 좋음
+  FAIR     // 보통
+  POOR     // 나쁨
+}
+
+enum ProductStatus {
+  AVAILABLE // 판매중
+  RESERVED  // 예약중
+  SOLD      // 판매완료
+  DELETED   // 삭제됨
+}
+
+enum MessageType {
+  TEXT  // 텍스트
+  IMAGE // 이미지
+  FILE  // 파일
+}
+
+enum ReportReason {
+  SPAM           // 스팸
+  INAPPROPRIATE  // 부적절한 내용
+  FRAUD          // 사기
+  FAKE_PRODUCT   // 가짜 상품
+  OTHER          // 기타
+}
+
+enum ReportStatus {
+  PENDING   // 대기중
+  REVIEWING // 검토중
+  RESOLVED  // 해결됨
+  REJECTED  // 거부됨
+}
+
+// Models
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  username     String
+  password     String
+  profileImage String?
+  location     String?
+  phone        String?
+
+  // 평점 시스템
+  rating      Float @default(0)
+  ratingCount Int   @default(0)
+
+  // 계정 상태
+  isVerified Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  // 타임스탬프
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products           Product[]
+  sentMessages       ChatMessage[]    @relation("MessageSender")
+  receivedChatRooms  ChatRoom[]       @relation("BuyerChatRooms")
+  createdChatRooms   ChatRoom[]       @relation("SellerChatRooms")
+  favorites          Favorite[]
+  givenReviews       Review[]         @relation("ReviewGiver")
+  receivedReviews    Review[]         @relation("ReviewReceiver")
+  reportsMade        Report[]         @relation("ReportMaker")
+  reportsReceived    Report[]         @relation("ReportTarget")
+
+  @@map("users")
+}
+
+model Product {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  price       Int
+  images      String[]
+  mainImageIndex Int            @default(0) // 메인 이미지 인덱스
+  category    ProductCategory
+  condition   ProductCondition
+  status      ProductStatus     @default(AVAILABLE)
+  location    String
+  latitude    Float?
+  longitude   Float?
+
+  // 통계
+  viewCount Int @default(0)
+  likeCount Int @default(0)
+
+  // 타임스탬프
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sellerId     String
+  seller       User         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  chatRooms    ChatRoom[]
+  favorites    Favorite[]
+  reports      Report[]
+
+  @@map("products")
+}
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  sellerId String
+  seller   User   @relation("SellerChatRooms", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  buyerId String
+  buyer   User   @relation("BuyerChatRooms", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  messages ChatMessage[]
+
+  @@unique([productId, sellerId, buyerId])
+  @@map("chat_rooms")
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  content   String
+  type      MessageType @default(TEXT)
+  isRead    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  // Relations
+  senderId String
+  sender   User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  chatRoomId String
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // 1-5 별점
+  content     String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  giverId String
+  giver   User   @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User   @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([giverId, receiverId])
+  @@map("reviews")
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  reporterId String
+  reporter   User   @relation("ReportMaker", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  targetUserId String?
+  targetUser   User?   @relation("ReportTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+} 
